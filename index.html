@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Générateur 5L</title>
+<style>
+:root{--bg:#f4f3ff;--card:#fff;--text:#1b1b2f;--muted:#6b6b8a;--line:#e3e1f5;--accent:#6c4cff;--accent2:#00c2a8;--code:#f0eefc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0d1a;--card:#171629;--text:#ecebff;--muted:#9a98c0;--line:#2a2847;--accent:#8b72ff;--accent2:#2ee6c5;--code:#0f0e1f}}
+:root[data-theme="dark"]{--bg:#0e0d1a;--card:#171629;--text:#ecebff;--muted:#9a98c0;--line:#2a2847;--accent:#8b72ff;--accent2:#2ee6c5;--code:#0f0e1f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:24px 16px}
+.wrap{width:100%;max-width:640px}
+h1{margin:0 0 4px;font-size:28px;letter-spacing:-.02em}
+h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 8px 30px color-mix(in srgb,var(--accent) 14%,transparent)}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type=text],input[type=number]{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--code);color:var(--text);font:inherit}
+input:focus{outline:2px solid var(--accent);border-color:transparent}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.chip{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--code);font-size:14px}
+.chip input{accent-color:var(--accent);width:16px;height:16px}
+.chip small{display:block;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 18px;cursor:pointer;transition:transform .1s,opacity .2s}
+button:active{transform:scale(.97)}
+.primary{flex:1;color:var(--onacc,#fff);background:linear-gradient(90deg,var(--accent),var(--accent3,#a24cff))}
+.ghost{background:var(--code);color:var(--text);border:1px solid var(--line)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.stats{display:flex;gap:10px;margin-bottom:12px}
+.stat{flex:1;background:var(--code);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:12px;color:var(--muted)}
+pre,.pre{margin:0;background:var(--code);border-radius:12px;padding:14px;font:14px/1.7 ui-monospace,Menlo,Consolas,monospace;max-height:260px;overflow:auto;min-height:60px}
+.empty{color:var(--muted)}
+.toast{min-height:20px;margin-top:10px;font-size:13px;color:var(--accent2)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;font-weight:600;text-decoration:none}
+.pill:hover{border-color:var(--accent)}
+select{font:inherit;font-size:14px;font-weight:600;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+select:focus{outline:2px solid var(--accent)}
+.links{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+body{background-image:var(--bgimg,none);background-attachment:fixed}
+#len,#fmt{width:100%;border-radius:10px;padding:11px 12px;font-size:16px;background:var(--code)}
+.mailwrap{position:relative}
+.mailmenu{position:absolute;top:100%;left:0;padding-top:6px;display:none;flex-direction:column;gap:6px;min-width:150px;z-index:15}
+.mailwrap:hover .mailmenu,.mailwrap:focus-within .mailmenu{display:flex}
+.card,.pill,select,.opt{transition:background .3s,border-color .3s,color .3s}
+button.pill{cursor:pointer;padding:9px 14px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+.overlay.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(320px,86vw);background:var(--card);color:var(--text);border-left:1px solid var(--line);transform:translateX(105%);visibility:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1),visibility 0s .35s;z-index:21;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:-10px 0 40px rgba(0,0,0,.25)}
+.drawer.on{transform:none;visibility:visible;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.dhead{display:flex;justify-content:space-between;align-items:center;padding:18px 18px 6px;font-size:20px}
+.x{background:var(--code);color:var(--text);border:1px solid var(--line);padding:6px 10px;border-radius:10px}
+#themeList{overflow:auto;padding:0 14px 24px}
+.grp{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:16px 4px 8px;font-weight:700}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:9px 12px;margin-bottom:6px;border-radius:12px;background:var(--code);color:var(--text);border:1px solid var(--line)}
+.opt.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.sw{width:34px;height:34px;border-radius:10px;border:1px solid rgba(128,128,128,.4);display:grid;place-items:center;flex:none}
+.sw i{width:18px;height:18px;border-radius:50%}
+select{font-size:18px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
+.ln{display:flex;align-items:center;gap:8px;padding:2px 6px;border-radius:8px}
+.ln:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.ln span{flex:1;cursor:pointer}
+.ln button{background:none;color:var(--muted);padding:2px 8px;font-size:16px;border-radius:8px}
+.ln button.on{color:var(--accent)}
+.bar{height:6px;border-radius:99px;background:var(--code);overflow:hidden;margin-top:12px;display:none}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent3,var(--accent2)))}
+.fh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.chk{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px;cursor:pointer}
+#tq{flex:1;min-width:0}
+.opt{text-align:start}
+[dir=rtl] .mailmenu{left:auto;right:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="links">
+      <a id="psn" class="pill" href="https://amethxst.dev/psn-availability" target="_blank" rel="noopener noreferrer">Disponibilité PSN ↗</a>
+      <div class="mailwrap">
+        <button id="mail" class="pill" type="button">Créer un e-mail ▾</button>
+        <div class="mailmenu">
+          <a class="pill" href="https://workspace.google.com/intl/us/gmail/" target="_blank" rel="noopener noreferrer">Gmail ↗</a>
+          <a class="pill" href="https://www.microsoft.com/en-us/microsoft-365/outlook/email-and-calendar-software-microsoft-outlook" target="_blank" rel="noopener noreferrer">Outlook ↗</a>
+        </div>
+      </div>
+      <a id="psnc" class="pill" href="https://www.playstation.com/en-us/" target="_blank" rel="noopener noreferrer">Créer un compte PSN ↗</a>
+    </div>
+    <div class="links"><button id="themeBtn" class="pill" type="button">🎨 Thèmes</button><select id="lang" aria-label="Langue">
+      <option value="fr">🇫🇷</option>
+      <option value="en">🇬🇧</option>
+      <option value="es">🇪🇸</option>
+      <option value="de">🇩🇪</option>
+      <option value="it">🇮🇹</option>
+      <option value="ja">🇯🇵</option>
+      <option value="ko">🇰🇷</option>
+      <option value="ru">🇷🇺</option>
+      <option value="pl">🇵🇱</option>
+      <option value="uk">🇺🇦</option>
+      <option value="pt">🇧🇷</option>
+      <option value="ar">🇸🇦</option>
+    </select></div>
+  </div>
+  <h1 id="titre">Générateur <span>5L ou 6L</span></h1>
+  <p class="sub" id="sub">Génère des 5L ou 6L pour tes comptes PSN ! Copie-les depuis ton navigateur ou télécharge-les en .txt.</p>
+
+  <div class="card">
+    <div class="row">
+      <div><label for="nb">Nombre de lignes</label><input id="nb" type="number" min="1" max="1000000" value="100"></div>
+      <div><label for="len">Caractères par ligne</label><select id="len"><option value="5">5L</option><option value="6">6L</option></select></div>
+    </div>
+    <div class="row" style="margin-top:12px;grid-template-columns:2fr 1fr"><div><label for="nom">Nom du fichier</label><input id="nom" type="text" value="names.txt"></div><div><label for="fmt">Format</label><select id="fmt"><option value="txt">.txt</option><option value="csv">.csv</option><option value="json">.json</option></select></div></div>
+    <div class="row" style="margin-top:12px"><div><label for="first">Premières lettres (facultatif)</label><input id="first" type="text" maxlength="6" autocomplete="off"></div><div><label for="last">Dernières lettres / chiffres (facultatif)</label><input id="last" type="text" maxlength="6" autocomplete="off"></div></div>
+    <div class="types" id="types">
+      <label class="chip"><input type="checkbox" value="majuscule" checked><div>Majuscule<small>Abcde</small></div></label>
+      <label class="chip"><input type="checkbox" value="chiffre" checked><div>Chiffre<small>a1bcd</small></div></label>
+      <label class="chip"><input type="checkbox" value="tiret" checked><div>Tiret<small>a-bcd</small></div></label>
+      <label class="chip"><input type="checkbox" value="normal" checked><div>Normal<small>abcde</small></div></label>
+    </div>
+    <label class="chk"><input type="checkbox" id="nodup" style="accent-color:var(--accent);width:16px;height:16px"><span id="nodupT">Sans doublons</span></label>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><b id="sLignes">0</b><span>lignes</span></div>
+      <div class="stat"><b id="sTaille">0 Ko</b><span>taille</span></div>
+    </div>
+    <div id="apercu" class="pre"><span class="empty">Aperçu : clique sur « Générer ».</span></div>
+    <div class="btns" style="margin-top:14px">
+      <button class="primary" id="gen">Générer</button>
+      <button class="ghost" id="dl" disabled>Télécharger</button>
+      <button class="ghost" id="cp" disabled>Copier</button>
+    </div>
+    <div class="bar" id="bar"><i id="barI"></i></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  <div class="card"><div class="fh"><b id="favT">Favoris</b><div class="links"><button class="ghost" id="favExp" type="button" style="padding:8px 12px">Exporter</button><button class="ghost" id="favImp" type="button" style="padding:8px 12px">Importer</button><button class="ghost" id="favCp" type="button" style="padding:8px 12px">Copier tout</button><button class="ghost" id="favClr" type="button" style="padding:8px 12px">Vider</button></div></div><div id="favs" class="pre"></div><div class="empty" id="favNote" style="font-size:12px;margin-top:8px"></div><input type="file" id="favFile" accept=".txt,text/plain" hidden></div>
+  <footer>Heavily made with Claude</footer>
+</div>
+
+<div class="overlay" id="ov"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="dhead"><b id="dTitle">Thèmes</b><button class="x" id="dClose" type="button" aria-label="Fermer">✕</button></div>
+  <div style="display:flex;gap:8px;padding:0 14px 8px"><input id="tq" type="text" autocomplete="off"><button id="rnd" class="pill" type="button">🎲</button></div>
+  <div id="themeList"></div>
+</aside>
+
+<script>
+const LETTRES="abcdefghijklmnopqrstuvwxyz",MAJ=LETTRES.toUpperCase(),CHIFFRES="0123456789";
+const pick=s=>s[Math.floor(Math.random()*s.length)];
+let contenu="",octets=0,nbLignes=0,lang="fr",lignesAll=[],busy=false,favs=[];
+const $=id=>document.getElementById(id);
+const I18N={
+ fr:{loc:"fr-FR",titre:"Générateur ",sub:"Génère des 5L ou 6L pour tes comptes PSN ! Copie-les depuis ton navigateur ou télécharge-les en .txt.",nb:"Nombre de lignes",len:"Taille du pseudo",nom:"Nom du fichier",majuscule:"Majuscule",chiffre:"Chiffre",tiret:"Tiret",normal:"Normal",lignes:"lignes",taille:"taille",empty:"Aperçu : clique sur « Générer ».",gen:"Générer",dl:"Télécharger",cp:"Copier",psn:"Disponibilité PSN ↗",ok:"Fichier généré avec succès !",none:"Choisis au moins un type de ligne.",dlna:"Téléchargement indisponible ici : utilise « Copier ».",dlfail:"Téléchargement annulé.",cpok:"Copié dans le presse-papiers.",cpfail:"Copie impossible ici.",ko:"Ko",mo:"Mo",mail:"Créer un e-mail ↗",psnc:"Créer un compte PSN ↗",th:"Thèmes",close:"Fermer",g_violet:"Violet",g_green:"Vert",g_red:"Rouge",g_blue:"Bleu",g_pink:"Rose",g_white:"Blanc",g_black:"Noir",g_teal:"Turquoise",g_orange:"Orange",g_yellow:"Jaune",g_mix:"Mélange",g_grad:"Dégradé",first:"Premières lettres (facultatif)",last:"Dernières lettres / chiffres (facultatif)",firstph:"",nodup:"Sans doublons",fmt:"Format",fav:"Favoris",cpall:"Copier tout",clr:"Vider",srch:"Rechercher un thème",rnd:"Aléatoire",uniq:"Seulement {n} lignes uniques possibles.",cpl:"Pseudo copié.",favempty:"Clique sur ☆ pour garder un pseudo.",expf:"Exporter",impf:"Importer",nostore:"Sauvegarde automatique indisponible dans ce navigateur : utilise Exporter / Importer pour garder tes favoris.",or:"ou",aria:"Langue"},
+ en:{loc:"en-US",titre:"Generator ",sub:"Generate 5L or 6L names for your PSN accounts! Copy them from your browser or download them as a .txt file.",nb:"Number of lines",len:"Username length",nom:"File name",majuscule:"Uppercase",chiffre:"Digit",tiret:"Dash",normal:"Normal",lignes:"lines",taille:"size",empty:"Preview: click “Generate”.",gen:"Generate",dl:"Download",cp:"Copy",psn:"PSN availability ↗",ok:"File generated successfully!",none:"Pick at least one line type.",dlna:"Download isn’t available here: use “Copy”.",dlfail:"Download cancelled.",cpok:"Copied to clipboard.",cpfail:"Copy isn’t possible here.",ko:"KB",mo:"MB",mail:"Create email ↗",psnc:"Create PSN account ↗",th:"Themes",close:"Close",g_violet:"Purple",g_green:"Green",g_red:"Red",g_blue:"Blue",g_pink:"Pink",g_white:"White",g_black:"Black",g_teal:"Teal",g_orange:"Orange",g_yellow:"Yellow",g_mix:"Mix",g_grad:"Gradient",first:"First letters (optional)",last:"Last letters / digits (optional)",firstph:"",nodup:"No duplicates",fmt:"Format",fav:"Favorites",cpall:"Copy all",clr:"Clear",srch:"Search themes",rnd:"Random",uniq:"Only {n} unique lines possible.",cpl:"Copied.",favempty:"Click ☆ to keep a name.",expf:"Export",impf:"Import",nostore:"Automatic saving isn’t available in this browser: use Export / Import to keep your favorites.",or:"or",aria:"Language"},
+ es:{loc:"es-ES",titre:"Generador ",sub:"¡Genera 5L o 6L para tus cuentas de PSN! Cópialos desde tu navegador o descárgalos en un archivo .txt.",nb:"Número de líneas",len:"Longitud del usuario",nom:"Nombre del archivo",majuscule:"Mayúscula",chiffre:"Dígito",tiret:"Guion",normal:"Normal",lignes:"líneas",taille:"tamaño",empty:"Vista previa: haz clic en «Generar».",gen:"Generar",dl:"Descargar",cp:"Copiar",psn:"Disponibilidad PSN ↗",ok:"¡Archivo generado con éxito!",none:"Elige al menos un tipo de línea.",dlna:"La descarga no está disponible aquí: usa «Copiar».",dlfail:"Descarga cancelada.",cpok:"Copiado al portapapeles.",cpfail:"No se puede copiar aquí.",ko:"KB",mo:"MB",mail:"Crear correo ↗",psnc:"Crear cuenta PSN ↗",th:"Temas",close:"Cerrar",g_violet:"Violeta",g_green:"Verde",g_red:"Rojo",g_blue:"Azul",g_pink:"Rosa",g_white:"Blanco",g_black:"Negro",g_teal:"Turquesa",g_orange:"Naranja",g_yellow:"Amarillo",g_mix:"Mezcla",g_grad:"Degradado",first:"Primeras letras (opcional)",last:"Últimas letras / cifras (opcional)",firstph:"",nodup:"Sin duplicados",fmt:"Formato",fav:"Favoritos",cpall:"Copiar todo",clr:"Vaciar",srch:"Buscar tema",rnd:"Aleatorio",uniq:"Solo son posibles {n} líneas únicas.",cpl:"Copiado.",favempty:"Haz clic en ☆ para guardar un nombre.",expf:"Exportar",impf:"Importar",nostore:"El guardado automático no está disponible en este navegador: usa Exportar / Importar para conservar tus favoritos.",or:"o",aria:"Idioma"},
+ de:{loc:"de-DE",titre:"Generator ",sub:"Generiere 5L oder 6L für deine PSN-Konten! Kopiere sie aus deinem Browser oder lade sie als .txt-Datei herunter.",nb:"Anzahl der Zeilen",len:"Länge des Benutzernamens",nom:"Dateiname",majuscule:"Großbuchstabe",chiffre:"Ziffer",tiret:"Bindestrich",normal:"Normal",lignes:"Zeilen",taille:"Größe",empty:"Vorschau: Klicke auf „Generieren“.",gen:"Generieren",dl:"Herunterladen",cp:"Kopieren",psn:"PSN-Verfügbarkeit ↗",ok:"Datei erfolgreich erstellt!",none:"Wähle mindestens einen Zeilentyp.",dlna:"Download hier nicht verfügbar: nutze „Kopieren“.",dlfail:"Download abgebrochen.",cpok:"In die Zwischenablage kopiert.",cpfail:"Kopieren hier nicht möglich.",ko:"KB",mo:"MB",mail:"E-Mail erstellen ↗",psnc:"PSN-Konto erstellen ↗",th:"Designs",close:"Schließen",g_violet:"Violett",g_green:"Grün",g_red:"Rot",g_blue:"Blau",g_pink:"Rosa",g_white:"Weiß",g_black:"Schwarz",g_teal:"Türkis",g_orange:"Orange",g_yellow:"Gelb",g_mix:"Mix",g_grad:"Verlauf",first:"Erste Buchstaben (optional)",last:"Letzte Buchstaben / Ziffern (optional)",firstph:"",nodup:"Ohne Duplikate",fmt:"Format",fav:"Favoriten",cpall:"Alle kopieren",clr:"Leeren",srch:"Design suchen",rnd:"Zufällig",uniq:"Nur {n} eindeutige Zeilen möglich.",cpl:"Kopiert.",favempty:"Klicke auf ☆, um einen Namen zu merken.",expf:"Exportieren",impf:"Importieren",nostore:"Automatisches Speichern ist in diesem Browser nicht verfügbar: Nutze Exportieren / Importieren, um deine Favoriten zu behalten.",or:"oder",aria:"Sprache"},
+ it:{loc:"it-IT",titre:"Generatore ",sub:"Genera 5L o 6L per i tuoi account PSN! Copiali dal browser o scaricali in .txt.",nb:"Numero di righe",len:"Lunghezza del nome",nom:"Nome del file",majuscule:"Maiuscola",chiffre:"Cifra",tiret:"Trattino",normal:"Normale",lignes:"righe",taille:"dimensione",empty:"Anteprima: clicca su «Genera».",gen:"Genera",dl:"Scarica",cp:"Copia",psn:"Disponibilità PSN ↗",ok:"File generato con successo!",none:"Scegli almeno un tipo di riga.",dlfail:"Download annullato.",cpok:"Copiato negli appunti.",cpfail:"Impossibile copiare qui.",ko:"KB",mo:"MB",aria:"Lingua",mail:"Crea e-mail ↗",psnc:"Crea account PSN ↗",th:"Temi",close:"Chiudi",g_violet:"Viola",g_green:"Verde",g_red:"Rosso",g_blue:"Blu",g_pink:"Rosa",g_white:"Bianco",g_black:"Nero",g_teal:"Turchese",g_orange:"Arancione",g_yellow:"Giallo",g_mix:"Mix",g_grad:"Sfumatura",first:"Prime lettere (facoltativo)",last:"Ultime lettere / cifre (facoltativo)",firstph:"",or:"o",nodup:"Senza duplicati",fmt:"Formato",fav:"Preferiti",cpall:"Copia tutto",clr:"Svuota",srch:"Cerca tema",rnd:"Casuale",uniq:"Solo {n} righe uniche possibili.",cpl:"Copiato.",favempty:"Clicca ☆ per salvare un nome.",expf:"Esporta",impf:"Importa",nostore:"Il salvataggio automatico non è disponibile in questo browser: usa Esporta / Importa per conservare i preferiti."},
+ ja:{loc:"ja-JP",titre:"ジェネレーター ",sub:"PSNアカウント用の5Lまたは6Lを生成！ブラウザからコピーするか、.txtでダウンロードできます。",nb:"行数",len:"ユーザー名の長さ",nom:"ファイル名",majuscule:"大文字",chiffre:"数字",tiret:"ハイフン",normal:"通常",lignes:"行",taille:"サイズ",empty:"プレビュー：「生成」をクリック。",gen:"生成",dl:"ダウンロード",cp:"コピー",psn:"PSN空き状況 ↗",ok:"ファイルを生成しました！",none:"行のタイプを1つ以上選んでください。",dlfail:"ダウンロードをキャンセルしました。",cpok:"クリップボードにコピーしました。",cpfail:"ここではコピーできません。",ko:"KB",mo:"MB",aria:"言語",mail:"メールを作成 ↗",psnc:"PSNアカウントを作成 ↗",th:"テーマ",close:"閉じる",g_violet:"紫",g_green:"緑",g_red:"赤",g_blue:"青",g_pink:"ピンク",g_white:"白",g_black:"黒",g_teal:"ターコイズ",g_orange:"オレンジ",g_yellow:"黄",g_mix:"ミックス",g_grad:"グラデーション",first:"最初の文字（任意）",last:"最後の文字／数字（任意）",firstph:"",or:"または",nodup:"重複なし",fmt:"形式",fav:"お気に入り",cpall:"すべてコピー",clr:"クリア",srch:"テーマを検索",rnd:"ランダム",uniq:"ユニークな行は{n}行のみ可能です。",cpl:"コピーしました。",favempty:"☆をクリックして名前を保存。",expf:"エクスポート",impf:"インポート",nostore:"このブラウザでは自動保存が使えません。エクスポート／インポートでお気に入りを保管してください。"},
+ ko:{loc:"ko-KR",titre:"생성기 ",sub:"PSN 계정용 5L 또는 6L을 생성하세요! 브라우저에서 복사하거나 .txt로 다운로드하세요.",nb:"줄 수",len:"아이디 길이",nom:"파일 이름",majuscule:"대문자",chiffre:"숫자",tiret:"하이픈",normal:"일반",lignes:"줄",taille:"크기",empty:"미리보기: ‘생성’을 클릭하세요.",gen:"생성",dl:"다운로드",cp:"복사",psn:"PSN 사용 가능 여부 ↗",ok:"파일이 생성되었습니다!",none:"줄 유형을 하나 이상 선택하세요.",dlfail:"다운로드가 취소되었습니다.",cpok:"클립보드에 복사되었습니다.",cpfail:"여기서는 복사할 수 없습니다.",ko:"KB",mo:"MB",aria:"언어",mail:"이메일 만들기 ↗",psnc:"PSN 계정 만들기 ↗",th:"테마",close:"닫기",g_violet:"보라",g_green:"초록",g_red:"빨강",g_blue:"파랑",g_pink:"분홍",g_white:"흰색",g_black:"검정",g_teal:"청록",g_orange:"주황",g_yellow:"노랑",g_mix:"믹스",g_grad:"그라데이션",first:"첫 글자 (선택)",last:"마지막 글자 / 숫자 (선택)",firstph:"",or:"또는",nodup:"중복 없음",fmt:"형식",fav:"즐겨찾기",cpall:"모두 복사",clr:"비우기",srch:"테마 검색",rnd:"랜덤",uniq:"고유한 줄은 {n}개만 가능합니다.",cpl:"복사되었습니다.",favempty:"☆를 눌러 이름을 저장하세요.",expf:"내보내기",impf:"가져오기",nostore:"이 브라우저에서는 자동 저장을 사용할 수 없습니다. 내보내기 / 가져오기로 즐겨찾기를 보관하세요."},
+ ru:{loc:"ru-RU",titre:"Генератор ",sub:"Генерируй 5L или 6L для своих аккаунтов PSN! Копируй из браузера или скачивай в .txt.",nb:"Количество строк",len:"Длина имени",nom:"Имя файла",majuscule:"Заглавная",chiffre:"Цифра",tiret:"Дефис",normal:"Обычная",lignes:"строк",taille:"размер",empty:"Предпросмотр: нажми «Создать».",gen:"Создать",dl:"Скачать",cp:"Копировать",psn:"Доступность PSN ↗",ok:"Файл успешно создан!",none:"Выбери хотя бы один тип строки.",dlfail:"Загрузка отменена.",cpok:"Скопировано в буфер обмена.",cpfail:"Здесь копирование невозможно.",ko:"КБ",mo:"МБ",aria:"Язык",mail:"Создать почту ↗",psnc:"Создать аккаунт PSN ↗",th:"Темы",close:"Закрыть",g_violet:"Фиолетовый",g_green:"Зелёный",g_red:"Красный",g_blue:"Синий",g_pink:"Розовый",g_white:"Белый",g_black:"Чёрный",g_teal:"Бирюзовый",g_orange:"Оранжевый",g_yellow:"Жёлтый",g_mix:"Микс",g_grad:"Градиент",first:"Первые буквы (необязательно)",last:"Последние буквы / цифры (необязательно)",firstph:"",or:"или",nodup:"Без повторов",fmt:"Формат",fav:"Избранное",cpall:"Копировать всё",clr:"Очистить",srch:"Найти тему",rnd:"Случайно",uniq:"Возможно только {n} уникальных строк.",cpl:"Скопировано.",favempty:"Нажми ☆, чтобы сохранить имя.",expf:"Экспорт",impf:"Импорт",nostore:"Автосохранение недоступно в этом браузере: используй экспорт / импорт, чтобы сохранить избранное."},
+ pl:{loc:"pl-PL",titre:"Generator ",sub:"Generuj 5L lub 6L do swoich kont PSN! Skopiuj z przeglądarki albo pobierz jako .txt.",nb:"Liczba linii",len:"Długość nazwy",nom:"Nazwa pliku",majuscule:"Wielka litera",chiffre:"Cyfra",tiret:"Myślnik",normal:"Zwykła",lignes:"linii",taille:"rozmiar",empty:"Podgląd: kliknij „Generuj”.",gen:"Generuj",dl:"Pobierz",cp:"Kopiuj",psn:"Dostępność PSN ↗",ok:"Plik wygenerowany pomyślnie!",none:"Wybierz co najmniej jeden typ linii.",dlfail:"Pobieranie anulowane.",cpok:"Skopiowano do schowka.",cpfail:"Kopiowanie tutaj nie jest możliwe.",ko:"KB",mo:"MB",aria:"Język",mail:"Utwórz e-mail ↗",psnc:"Utwórz konto PSN ↗",th:"Motywy",close:"Zamknij",g_violet:"Fioletowy",g_green:"Zielony",g_red:"Czerwony",g_blue:"Niebieski",g_pink:"Różowy",g_white:"Biały",g_black:"Czarny",g_teal:"Turkusowy",g_orange:"Pomarańczowy",g_yellow:"Żółty",g_mix:"Mix",g_grad:"Gradient",first:"Pierwsze litery (opcjonalnie)",last:"Ostatnie litery / cyfry (opcjonalnie)",firstph:"",or:"lub",nodup:"Bez duplikatów",fmt:"Format",fav:"Ulubione",cpall:"Kopiuj wszystko",clr:"Wyczyść",srch:"Szukaj motywu",rnd:"Losowy",uniq:"Możliwe tylko {n} unikalnych linii.",cpl:"Skopiowano.",favempty:"Kliknij ☆, aby zachować nazwę.",expf:"Eksportuj",impf:"Importuj",nostore:"Automatyczne zapisywanie jest niedostępne w tej przeglądarce: użyj eksportu / importu, aby zachować ulubione."},
+ uk:{loc:"uk-UA",titre:"Генератор ",sub:"Генеруй 5L або 6L для своїх акаунтів PSN! Копіюй із браузера або завантажуй у .txt.",nb:"Кількість рядків",len:"Довжина імені",nom:"Назва файлу",majuscule:"Велика літера",chiffre:"Цифра",tiret:"Дефіс",normal:"Звичайна",lignes:"рядків",taille:"розмір",empty:"Попередній перегляд: натисни «Згенерувати».",gen:"Згенерувати",dl:"Завантажити",cp:"Копіювати",psn:"Доступність PSN ↗",ok:"Файл успішно створено!",none:"Обери принаймні один тип рядка.",dlfail:"Завантаження скасовано.",cpok:"Скопійовано в буфер обміну.",cpfail:"Тут копіювання неможливе.",ko:"КБ",mo:"МБ",aria:"Мова",mail:"Створити пошту ↗",psnc:"Створити акаунт PSN ↗",th:"Теми",close:"Закрити",g_violet:"Фіолетовий",g_green:"Зелений",g_red:"Червоний",g_blue:"Синій",g_pink:"Рожевий",g_white:"Білий",g_black:"Чорний",g_teal:"Бірюзовий",g_orange:"Помаранчевий",g_yellow:"Жовтий",g_mix:"Мікс",g_grad:"Градієнт",first:"Перші літери (необов’язково)",last:"Останні літери / цифри (необов’язково)",firstph:"",or:"або",nodup:"Без повторів",fmt:"Формат",fav:"Обране",cpall:"Копіювати все",clr:"Очистити",srch:"Шукати тему",rnd:"Випадково",uniq:"Можливо лише {n} унікальних рядків.",cpl:"Скопійовано.",favempty:"Натисни ☆, щоб зберегти ім’я.",expf:"Експорт",impf:"Імпорт",nostore:"Автозбереження недоступне в цьому браузері: використай експорт / імпорт, щоб зберегти обране."},
+ pt:{loc:"pt-BR",titre:"Gerador ",sub:"Gere 5L ou 6L para suas contas PSN! Copie-os do navegador ou baixe-os em .txt.",nb:"Número de linhas",len:"Tamanho do nome",nom:"Nome do arquivo",majuscule:"Maiúscula",chiffre:"Dígito",tiret:"Hífen",normal:"Normal",lignes:"linhas",taille:"tamanho",empty:"Prévia: clique em “Gerar”.",gen:"Gerar",dl:"Baixar",cp:"Copiar",psn:"Disponibilidade PSN ↗",ok:"Arquivo gerado com sucesso!",none:"Escolha pelo menos um tipo de linha.",dlfail:"Download cancelado.",cpok:"Copiado para a área de transferência.",cpfail:"Não é possível copiar aqui.",ko:"KB",mo:"MB",aria:"Idioma",mail:"Criar e-mail ↗",psnc:"Criar conta PSN ↗",th:"Temas",close:"Fechar",g_violet:"Roxo",g_green:"Verde",g_red:"Vermelho",g_blue:"Azul",g_pink:"Rosa",g_white:"Branco",g_black:"Preto",g_teal:"Turquesa",g_orange:"Laranja",g_yellow:"Amarelo",g_mix:"Mix",g_grad:"Gradiente",first:"Primeiras letras (opcional)",last:"Últimas letras / dígitos (opcional)",firstph:"",or:"ou",nodup:"Sem duplicados",fmt:"Formato",fav:"Favoritos",cpall:"Copiar tudo",clr:"Limpar",srch:"Buscar tema",rnd:"Aleatório",uniq:"Apenas {n} linhas únicas possíveis.",cpl:"Copiado.",favempty:"Clique em ☆ para guardar um nome.",expf:"Exportar",impf:"Importar",nostore:"O salvamento automático não está disponível neste navegador: use Exportar / Importar para manter seus favoritos."},
+ ar:{loc:"ar",titre:"مولّد ",sub:"أنشئ 5L أو 6L لحسابات PSN الخاصة بك! انسخها من المتصفح أو نزّلها بصيغة .txt.",nb:"عدد الأسطر",len:"طول الاسم",nom:"اسم الملف",majuscule:"حرف كبير",chiffre:"رقم",tiret:"شرطة",normal:"عادي",lignes:"أسطر",taille:"الحجم",empty:"المعاينة: انقر على «إنشاء».",gen:"إنشاء",dl:"تنزيل",cp:"نسخ",psn:"توفّر PSN ↗",ok:"تم إنشاء الملف بنجاح!",none:"اختر نوع سطر واحدًا على الأقل.",dlfail:"تم إلغاء التنزيل.",cpok:"تم النسخ إلى الحافظة.",cpfail:"النسخ غير ممكن هنا.",ko:"ك.ب",mo:"م.ب",aria:"اللغة",mail:"إنشاء بريد إلكتروني ↗",psnc:"إنشاء حساب PSN ↗",th:"السمات",close:"إغلاق",g_violet:"بنفسجي",g_green:"أخضر",g_red:"أحمر",g_blue:"أزرق",g_pink:"وردي",g_white:"أبيض",g_black:"أسود",g_teal:"فيروزي",g_orange:"برتقالي",g_yellow:"أصفر",g_mix:"مزيج",g_grad:"تدرّج",first:"الأحرف الأولى (اختياري)",last:"الأحرف / الأرقام الأخيرة (اختياري)",firstph:"",or:"أو",nodup:"بدون تكرار",fmt:"الصيغة",fav:"المفضّلة",cpall:"نسخ الكل",clr:"مسح",srch:"ابحث عن سمة",rnd:"عشوائي",uniq:"يمكن إنشاء {n} أسطر فريدة فقط.",cpl:"تم النسخ.",favempty:"انقر على ☆ لحفظ اسم.",expf:"تصدير",impf:"استيراد",nostore:"الحفظ التلقائي غير متاح في هذا المتصفح: استخدم التصدير / الاستيراد للاحتفاظ بمفضّلتك."}
+};
+const t=k=>I18N[lang][k]??I18N.en[k];
+function showSize(){
+  $("sLignes").textContent=nbLignes.toLocaleString(t("loc"));
+  const n=(octets>1048576?(octets/1048576).toFixed(1)+" "+t("mo"):Math.ceil(octets/1024)+" "+t("ko"));
+  $("sTaille").textContent=n;
+}
+function applyLang(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  $("lang").setAttribute("aria-label",t("aria"));
+  $("titre").firstChild.textContent=t("titre");
+  $("titre").querySelector("span").textContent="5L "+t("or")+" 6L";
+  $("sub").textContent=t("sub");
+  $("psn").textContent=t("psn");$("mail").textContent=t("mail").replace("↗","▾");$("psnc").textContent=t("psnc");
+  $("themeBtn").textContent="🎨 "+t("th");$("dTitle").textContent=t("th");$("dClose").setAttribute("aria-label",t("close"));
+  renderThemes();
+  document.querySelector('label[for=nb]').textContent=t("nb");
+  document.querySelector('label[for=len]').textContent=t("len");
+  document.querySelector('label[for=nom]').textContent=t("nom");
+  document.querySelector('label[for=first]').textContent=t("first");document.querySelector('label[for=last]').textContent=t("last");$("first").placeholder=t("firstph");
+  document.querySelectorAll("#types .chip").forEach(c=>{c.querySelector("div").firstChild.textContent=t(c.querySelector("input").value)});
+  const sp=document.querySelectorAll(".stat span");sp[0].textContent=t("lignes");sp[1].textContent=t("taille");
+  $("gen").textContent=t("gen");$("dl").textContent=t("dl");$("cp").textContent=t("cp");
+  $("nodupT").textContent=t("nodup");document.querySelector('label[for=fmt]').textContent=t("fmt");$("favCp").textContent=t("cpall");$("favClr").textContent=t("clr");$("tq").placeholder=t("srch");$("tq").setAttribute("aria-label",t("srch"));$("rnd").textContent="🎲 "+t("rnd");$("favExp").textContent=t("expf");$("favImp").textContent=t("impf");renderFavs();
+  if(!contenu){const e=document.querySelector("#apercu .empty");if(e)e.textContent=t("empty")}
+  showSize();
+}
+
+const rc=x=>[...x].map(c=>Math.random()<.5?c.toLowerCase():c.toUpperCase()).join("");
+function ligne(types,n,f,s){
+  const t=types[Math.floor(Math.random()*types.length)];
+  let out=t==="majuscule"?pick(MAJ):pick(LETTRES);
+  for(let i=0;i<n-1;i++){
+    if(t==="chiffre"&&i===0)out+=pick(CHIFFRES);
+    else if(t==="tiret"&&i===0)out+="-";
+    else out+=pick(LETTRES);
+  }
+  if(f)out=rc(f)+out.slice(f.length);
+  if(s)out=out.slice(0,n-s.length)+rc(s);
+  return out;
+}
+function toast(m){$("toast").textContent=m;setTimeout(()=>{$("toast").textContent=""},3500)}
+
+$("gen").onclick=async()=>{
+  if(busy)return;
+  const types=[...document.querySelectorAll("#types input:checked")].map(i=>i.value);
+  if(!types.length){toast(t("none"));return}
+  const nb=Math.min(Math.max(+$("nb").value||1,1),1000000);
+  const n=Math.min(Math.max(+$("len").value||5,2),64);
+  const f=($("first").value||"").replace(/[^a-zA-Z]/g,"").slice(0,n);
+  const s=($("last").value||"").replace(/[^a-zA-Z0-9]/g,"").slice(0,n-f.length);
+  const uniq=$("nodup").checked,out=[],seen=uniq?new Set():null,cap=nb*30+1000;
+  let tries=0;
+  busy=true;$("gen").disabled=$("dl").disabled=$("cp").disabled=true;
+  $("bar").style.display="block";$("barI").style.width="0";
+  while(out.length<nb&&tries<cap){
+    const stop=Math.min(tries+20000,cap);
+    for(;tries<stop&&out.length<nb;tries++){const l=ligne(types,n,f,s);if(seen){if(seen.has(l))continue;seen.add(l)}out.push(l)}
+    $("barI").style.width=(out.length/nb*100)+"%";
+    await new Promise(r=>setTimeout(r));
+  }
+  lignesAll=out;contenu=out.join("\n")+"\n";
+  renderPreview();
+  nbLignes=out.length;octets=out.length*(n+1);showSize();
+  $("bar").style.display="none";busy=false;$("gen").disabled=false;$("dl").disabled=$("cp").disabled=!out.length;
+  toast(out.length<nb?t("uniq").replace("{n}",out.length.toLocaleString(t("loc"))):t("ok"));
+};
+
+const MEOW="data:audio/mpeg;base64,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";
+const KEY="set5l",FIELDS=["nb","len","nom","fmt","first","last"];
+function saveSet(){try{const o={lang};FIELDS.forEach(k=>o[k]=$(k).value);o.nodup=$("nodup").checked;o.types=[...document.querySelectorAll("#types input")].map(i=>i.checked);localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+function loadSet(){try{const o=JSON.parse(localStorage.getItem(KEY)||"null");if(!o)return null;FIELDS.forEach(k=>{if(o[k]!=null){$(k).value=o[k];if($(k).tagName==="SELECT"&&$(k).value==="")$(k).selectedIndex=0}});$("nodup").checked=!!o.nodup;if(Array.isArray(o.types))document.querySelectorAll("#types input").forEach((c,i)=>{if(i<o.types.length)c.checked=!!o.types[i]});return o}catch(e){return null}}
+document.querySelector(".wrap").addEventListener("input",saveSet);
+document.querySelector(".wrap").addEventListener("change",saveSet);
+$("fmt").addEventListener("change",()=>{$("nom").value=$("nom").value.replace(/\.(txt|csv|json)$/i,"")+"."+$("fmt").value});
+const lineHTML=l=>{const on=favs.includes(l);return `<div class="ln"><span data-c="${l}">${l}</span><button type="button" data-f="${l}" class="${on?"on":""}" aria-label="★">${on?"★":"☆"}</button></div>`};
+function renderPreview(){$("apercu").innerHTML=lignesAll.slice(0,200).map(lineHTML).join("")+(lignesAll.length>200?'<div class="empty">…</div>':"")}
+function renderFavs(){$("favNote").textContent=storeOK?"":t("nostore");$("favT").textContent=t("fav")+" ("+favs.length+")";$("favs").innerHTML=favs.length?favs.map(lineHTML).join(""):`<span class="empty">${t("favempty")}</span>`}
+function syncStars(){document.querySelectorAll("#apercu [data-f]").forEach(b=>{const on=favs.includes(b.dataset.f);b.textContent=on?"★":"☆";b.classList.toggle("on",on)})}
+function saveFavs(){try{localStorage.setItem("fav5l",JSON.stringify(favs))}catch(e){}renderFavs();syncStars()}
+function lineClick(e){
+  const c=e.target.closest("[data-c]"),f=e.target.closest("[data-f]");
+  if(c){navigator.clipboard.writeText(c.dataset.c).then(()=>toast(t("cpl")),()=>toast(t("cpfail")))}
+  else if(f){const v=f.dataset.f,i=favs.indexOf(v);if(i<0)favs.push(v);else favs.splice(i,1);saveFavs()}
+}
+$("apercu").onclick=$("favs").onclick=lineClick;
+$("favCp").onclick=()=>{if(favs.length)navigator.clipboard.writeText(favs.join("\n")).then(()=>toast(t("cpok")),()=>toast(t("cpfail")))};
+$("favClr").onclick=()=>{favs=[];saveFavs()};
+function exportData(fm){return fm==="json"?JSON.stringify(lignesAll):fm==="csv"?"pseudo\n"+contenu:contenu}
+const storeOK=(()=>{try{localStorage.setItem("t5l","1");localStorage.removeItem("t5l");return true}catch(e){return false}})();
+async function saveFile(nom,dat,mime){
+  let d=null;
+  try{d=(typeof claude!=="undefined"&&claude.use)?await claude.use("downloads"):null}catch(e){d=null}
+  if(d){try{await d.save({filename:nom,data:dat});return}catch(e){if(e&&e.code==="declined")return}}
+  const u=URL.createObjectURL(new Blob([dat],{type:mime+";charset=utf-8"}));
+  const a=document.createElement("a");a.href=u;a.download=nom;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),2000);
+}
+$("favExp").onclick=()=>{if(favs.length)saveFile("favoris.txt",favs.join("\n")+"\n","text/plain")};
+$("favImp").onclick=()=>$("favFile").click();
+$("favFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const tx=await f.text();tx.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^[A-Za-z0-9-]{1,64}$/.test(x)&&!favs.includes(x)).forEach(x=>favs.push(x));saveFavs()}catch(err){}e.target.value=""};
+function sfx(){try{const a=new Audio(MEOW);a.volume=.8;const r=a.play();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+$("dl").onclick=async()=>{
+  sfx();
+  try{
+    const fm=$("fmt").value,nom=$("nom").value||("names."+fm),dat=exportData(fm);
+    let d=null;
+    try{d=(typeof claude!=="undefined"&&claude.use)?await claude.use("downloads"):null}catch(e){d=null}
+    if(d){
+      try{await d.save({filename:nom,data:dat});return}
+      catch(e){if(e&&e.code==="declined"){toast(t("dlfail"));return}}
+    }
+    const u=URL.createObjectURL(new Blob([dat],{type:(fm==="json"?"application/json":fm==="csv"?"text/csv":"text/plain")+";charset=utf-8"}));
+    const a=document.createElement("a");a.href=u;a.download=nom;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),2000);
+  }catch(e){toast(t("dlfail"))}
+};
+$("cp").onclick=async()=>{
+  try{await navigator.clipboard.writeText(contenu);toast(t("cpok"))}
+  catch(e){toast(t("cpfail"))}
+};
+/* ---- Thèmes ---- */
+const N=(h,dark,sat)=>dark?{"--bg":`hsl(${h} ${sat}% 7%)`,"--card":`hsl(${h} ${sat}% 11%)`,"--text":`hsl(${h} 30% 94%)`,"--muted":`hsl(${h} 14% 66%)`,"--line":`hsl(${h} ${sat}% 21%)`,"--code":`hsl(${h} ${sat}% 5%)`}:{"--bg":`hsl(${h} ${sat}% 97%)`,"--card":"#fff","--text":`hsl(${h} 35% 12%)`,"--muted":`hsl(${h} 14% 42%)`,"--line":`hsl(${h} ${sat}% 89%)`,"--code":`hsl(${h} ${sat}% 94%)`};
+const T=(id,g,name,h,dark,sat,a,b,c,on,o)=>({id,g,name,dark,vars:{...N(h,dark,sat),"--accent":a,"--accent2":b,"--accent3":c,"--onacc":on,...(o||{})}});
+const THEMES=[
+ {id:"auto",g:"violet",name:"Violet (auto)",vars:null,sw:{bg:"#f4f3ff",a:"#6c4cff",c:"#a24cff"}},
+ T("emerald","green","Emerald",150,false,60,"hsl(152 65% 36%)","hsl(172 75% 40%)","hsl(130 55% 42%)","#fff"),
+ T("forest","green","Forest",140,true,30,"hsl(140 55% 48%)","hsl(165 65% 50%)","hsl(110 45% 45%)","#04150a"),
+ T("lime","green","Lime",85,false,60,"hsl(84 70% 36%)","hsl(60 70% 40%)","hsl(110 60% 38%)","#fff"),
+ T("ruby","red","Ruby",350,false,60,"hsl(350 75% 46%)","hsl(15 85% 52%)","hsl(330 70% 46%)","#fff"),
+ T("crimson","red","Crimson",0,true,30,"hsl(0 75% 55%)","hsl(25 90% 58%)","hsl(345 75% 50%)","#fff"),
+ T("coral","red","Coral",12,false,60,"hsl(12 85% 55%)","hsl(38 90% 52%)","hsl(350 80% 58%)","#fff"),
+ T("ocean","blue","Ocean",210,false,60,"hsl(212 80% 48%)","hsl(188 80% 42%)","hsl(235 70% 55%)","#fff"),
+ T("sky","blue","Sky",195,false,60,"hsl(196 85% 42%)","hsl(170 70% 42%)","hsl(215 80% 55%)","#fff"),
+ T("navy","blue","Navy",225,true,32,"hsl(222 85% 65%)","hsl(190 85% 58%)","hsl(255 75% 66%)","#050b24"),
+ T("rose","pink","Rose",338,false,60,"hsl(338 80% 52%)","hsl(18 85% 58%)","hsl(310 65% 52%)","#fff"),
+ T("fuchsia","pink","Fuchsia",310,true,30,"hsl(315 85% 62%)","hsl(280 80% 68%)","hsl(340 85% 62%)","#1f0618"),
+ T("candy","pink","Candy",325,false,70,"hsl(325 85% 60%)","hsl(290 70% 62%)","hsl(350 90% 66%)","#fff"),
+ T("snow","white","Snow",220,false,14,"hsl(222 20% 28%)","hsl(215 60% 50%)","hsl(230 25% 40%)","#fff"),
+ T("pearl","white","Pearl",35,false,30,"hsl(30 35% 40%)","hsl(15 55% 50%)","hsl(45 45% 45%)","#fff"),
+ T("cloud","white","Cloud",200,false,22,"hsl(205 45% 42%)","hsl(180 40% 42%)","hsl(225 40% 50%)","#fff"),
+ T("midnight","black","Midnight",240,true,10,"hsl(240 80% 74%)","hsl(200 80% 66%)","hsl(270 70% 70%)","#0a0a1f",{"--bg":"#000"}),
+ T("obsidian","black","Obsidian",0,true,0,"hsl(0 0% 88%)","hsl(0 0% 70%)","hsl(0 0% 100%)","#111",{"--bg":"#000","--card":"#0d0d0d","--code":"#050505"}),
+ T("carbon","black","Carbon",210,true,6,"hsl(160 70% 55%)","hsl(185 70% 55%)","hsl(140 65% 52%)","#04140f",{"--bg":"#050505"})
+];
+const GEN="Amber:orange:38:25:0:0;Tangerine:orange:24:8:1:0;Rust:orange:16:32:1:0;Peach:orange:20:40:0:0;Pumpkin:orange:28:12:0:0;Lemon:yellow:55:75:0:0;Gold:yellow:46:30:1:0;Honey:yellow:42:55:0:0;Sunflower:yellow:50:20:1:0;Teal:teal:175:195:0:0;Lagoon:teal:185:160:1:0;Aqua:teal:190:210:0:0;Jade:teal:160:180:1:0;Turquoise:teal:172:150:0:0;Lavender:violet:265:290:0:0;Grape:violet:280:300:1:0;Indigo:violet:255:230:1:0;Amethyst:violet:270:320:0:0;Plum:violet:300:330:1:0;Moss:green:100:130:1:0;Sage:green:120:150:0:0;Pine:green:155:175:1:0;Cherry:red:345:10:1:0;Brick:red:8:25:0:0;Wine:red:340:320:1:0;Azure:blue:205:185:0:0;Denim:blue:215:235:1:0;Arctic:blue:190:215:0:0;Flamingo:pink:350:15:0:0;Orchid:pink:300:325:0:0;Magenta:pink:320:290:1:0;Aurora:mix:150:280:1:0;Citrus:mix:90:40:0:0;Berry:mix:330:270:1:0;Tropical:mix:175:45:0:0;Toxic:mix:110:300:1:0;Bubblegum:mix:330:190:0:0;Autumn:mix:25:100:0:0;Neon:mix:300:180:1:0;Lava:mix:5:45:1:0;Glacier:mix:195:265:0:0;Jungle:mix:130:50:1:0;Cosmos:mix:260:330:1:0;Sorbet:mix:350:60:0:0;Mojito:mix:140:95:0:0;Blueberry:mix:230:330:1:0;Ember:mix:15:350:1:0;Seaweed:mix:165:105:1:0;Cyber:mix:185:315:1:0;Dusk:mix:250:15:1:0;Spring:mix:120:340:0:0;Sunset:grad:15:335:1:1;Sunrise:grad:25:50:0:1;Borealis:grad:150:270:1:1;Deep Sea:grad:215:245:1:1;Cotton Candy:grad:330:200:0:1;Lavender Haze:grad:270:320:0:1;Mango:grad:40:10:0:1;Peachy:grad:20:340:0:1;Mint Fresh:grad:160:120:0:1;Lime Soda:grad:90:170:0:1;Twilight:grad:260:330:1:1;Midnight Sky:grad:235:280:1:1;Volcano:grad:5:30:1:1;Rose Gold:grad:350:30:0:1;Emerald Sea:grad:155:195:1:1;Violet Dream:grad:275:310:1:1;Fireworks:grad:340:50:1:1;Glacial:grad:195:230:0:1;Orchid Fog:grad:300:260:0:1;Tropic:grad:170:50:0:1;Neon City:grad:310:190:1:1;Candy Floss:grad:320:260:0:1;Forest Dawn:grad:130:60:1:1;Lava Lamp:grad:330:20:1:1;Blue Lagoon:grad:190:220:0:1;Spring Bloom:grad:340:110:0:1;Autumn Leaves:grad:30:5:1:1;Galaxy:grad:250:320:1:1;Ice Cream:grad:335:175:0:1;Citrus Splash:grad:55:130:0:1;Royal:grad:240:290:1:1;Coral Reef:grad:10:180:0:1;Toxic Waste:grad:105:280:1:1;Dusk Rose:grad:330:250:1:1;Sandstorm:grad:38:20:0:1;Moonlight:grad:230:200:1:1";
+GEN.split(";").forEach((s,i)=>{
+  const [n,g,a,b,d,r]=s.split(":"),h1=+a,h2=+b,dk=d==="1",L=dk?62:44,S=dk?80:78;
+  const vars={...N(h1,dk,dk?30:60),"--accent":`hsl(${h1} ${S}% ${L}%)`,"--accent2":`hsl(${h2} ${S}% ${L+2}%)`,"--accent3":`hsl(${(h2+30)%360} ${S}% ${L+4}%)`,"--onacc":dk?"#0b0b14":"#fff"};
+  if(r==="1")vars["--bgimg"]=dk?`linear-gradient(135deg,hsl(${h1} 50% 11%),hsl(${h2} 50% 8%))`:`linear-gradient(135deg,hsl(${h1} 90% 94%),hsl(${h2} 90% 92%))`;
+  THEMES.push({id:"g"+i,g,name:n,dark:dk,vars});
+});
+const TH_ORDER=["violet","green","teal","blue","pink","red","orange","yellow","white","black","mix","grad"];
+const VARS=["--bg","--card","--text","--muted","--line","--code","--accent","--accent2","--accent3","--onacc","--bgimg"];
+let themeId="auto";
+const swOf=th=>th.vars?{bg:th.vars["--bgimg"]||th.vars["--bg"],a:th.vars["--accent"],c:th.vars["--accent3"]}:th.sw;
+function renderThemes(){
+  let h="";
+  TH_ORDER.forEach(g=>{
+    const q=($("tq").value||"").toLowerCase(),list=THEMES.filter(x=>x.g===g&&(!q||x.name.toLowerCase().includes(q)));
+    if(!list.length)return;
+    h+=`<div class="grp">${t("g_"+g)}</div>`;
+    list.forEach(th=>{const s=swOf(th);h+=`<button type="button" class="opt${th.id===themeId?" on":""}" data-id="${th.id}"><span class="sw" style="background:${s.bg}"><i style="background:linear-gradient(135deg,${s.a},${s.c})"></i></span>${th.name}</button>`});
+  });
+  $("themeList").innerHTML=h;
+}
+function setTheme(id,save){
+  const th=THEMES.find(x=>x.id===id)||THEMES[0],r=document.documentElement;
+  VARS.forEach(v=>r.style.removeProperty(v));
+  r.style.colorScheme="";
+  if(th.vars){for(const k in th.vars)r.style.setProperty(k,th.vars[k]);r.style.colorScheme=th.dark?"dark":"light"}
+  themeId=th.id;
+  if(save){try{localStorage.setItem("theme5l",th.id)}catch(e){}}
+  renderThemes();
+}
+function drawer(on){
+  $("drawer").classList.toggle("on",on);$("ov").classList.toggle("on",on);
+  $("drawer").setAttribute("aria-hidden",String(!on));
+}
+$("themeBtn").onclick=()=>{drawer(true);setTimeout(()=>$("tq").focus(),60)};
+$("tq").oninput=renderThemes;
+$("rnd").onclick=()=>setTheme(THEMES[Math.floor(Math.random()*THEMES.length)].id,true);
+$("dClose").onclick=$("ov").onclick=()=>drawer(false);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")drawer(false)});
+$("themeList").onclick=e=>{const b=e.target.closest(".opt");if(b)setTheme(b.dataset.id,true)};
+
+$("lang").onchange=e=>{lang=e.target.value;applyLang()};
+try{const s=localStorage.getItem("theme5l");if(s)themeId=s}catch(e){}
+setTheme(themeId,false);
+const DISPO=["fr","en","es","de","it","ja","ko","ru","pl","uk","pt","ar"];
+const prefs=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||"en"]).map(l=>String(l).toLowerCase().slice(0,2));
+try{favs=JSON.parse(localStorage.getItem("fav5l")||"[]").filter(x=>/^[A-Za-z0-9-]{1,64}$/.test(x))}catch(e){favs=[]}
+const sv=loadSet();
+lang=(sv&&DISPO.includes(sv.lang))?sv.lang:(prefs.find(l=>DISPO.includes(l))||"en");
+$("lang").value=lang;
+applyLang();
+</script>
+</body>
+</html>
