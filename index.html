@@ -18,7 +18,7 @@ h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-b
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 8px 30px color-mix(in srgb,var(--accent) 14%,transparent)}
 label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-input[type=text],input[type=number]{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--code);color:var(--text);font:inherit}
+input[type=text],input[type=number],input[type=password]{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--code);color:var(--text);font:inherit}
 input:focus{outline:2px solid var(--accent);border-color:transparent}
 .types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .chip{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--code);font-size:14px}
@@ -76,6 +76,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
 #tq{flex:1;min-width:0}
 .opt{text-align:start}
 [dir=rtl] .mailmenu{left:auto;right:0}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;background:var(--card);color:var(--muted);border:1px solid var(--line);padding:11px}
+.tab.on{color:var(--onacc,#fff);background:linear-gradient(90deg,var(--accent),var(--accent3,var(--accent2)));border-color:transparent}
+.acc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:var(--code)}
+.acc .f{display:flex;align-items:center;gap:8px;margin:4px 0}
+.acc .f small{width:96px;color:var(--muted);flex:none}
+.acc .f span{flex:1;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.mini{background:none;border:1px solid var(--line);color:var(--text);padding:4px 8px;border-radius:8px;font-size:14px}
+.del{color:var(--muted);margin-top:6px}
 </style>
 </head>
 <body>
@@ -109,6 +119,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
   </div>
   <h1 id="titre">Générateur <span>5L ou 6L</span></h1>
   <p class="sub" id="sub">Génère des 5L ou 6L pour tes comptes PSN ! Copie-les depuis ton navigateur ou télécharge-les en .txt.</p>
+  <div class="tabs" role="tablist"><button class="tab on" id="tbGen" type="button" role="tab" aria-selected="true">Générateur</button><button class="tab" id="tbAcc" type="button" role="tab" aria-selected="false">Comptes</button></div>
+  <div id="tabGen">
 
   <div class="card">
     <div class="row">
@@ -141,6 +153,23 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
   <div class="card"><div class="fh"><b id="favT">Favoris</b><div class="links"><button class="ghost" id="favExp" type="button" style="padding:8px 12px">Exporter</button><button class="ghost" id="favImp" type="button" style="padding:8px 12px">Importer</button><button class="ghost" id="favCp" type="button" style="padding:8px 12px">Copier tout</button><button class="ghost" id="favClr" type="button" style="padding:8px 12px">Vider</button></div></div><div id="favs" class="pre"></div><div class="empty" id="favNote" style="font-size:12px;margin-top:8px"></div><input type="file" id="favFile" accept=".txt,text/plain" hidden></div>
+  </div>
+  <div id="tabAcc" hidden>
+    <div class="card">
+      <div class="row">
+        <div><label for="ap">Pseudo PSN</label><input id="ap" type="text" autocomplete="off"></div>
+        <div><label for="ae">E-mail</label><input id="ae" type="text" inputmode="email" autocomplete="off"></div>
+      </div>
+      <div style="margin-top:12px"><label for="aw">Mot de passe</label><div style="display:flex;gap:8px"><input id="aw" type="password" autocomplete="new-password"><button class="ghost" id="awEye" type="button" style="padding:8px 12px">👁</button></div></div>
+      <div class="btns" style="margin-top:14px"><button class="primary" id="accAdd" type="button">Enregistrer le compte</button></div>
+      <p class="empty" id="accWarn" style="font-size:12px;margin:12px 0 0"></p>
+    </div>
+    <div class="card">
+      <div class="fh"><span></span><div class="links"><button class="ghost" id="accExp" type="button" style="padding:8px 12px">Exporter</button><button class="ghost" id="accImp" type="button" style="padding:8px 12px">Importer</button></div></div>
+      <div id="accList"></div>
+      <input type="file" id="accFile" accept=".json,application/json" hidden>
+    </div>
+  </div>
   <footer>Heavily made with Claude</footer>
 </div>
 
@@ -170,6 +199,22 @@ const I18N={
  pt:{loc:"pt-BR",titre:"Gerador ",sub:"Gere 5L ou 6L para suas contas PSN! Copie-os do navegador ou baixe-os em .txt.",nb:"Número de linhas",len:"Tamanho do nome",nom:"Nome do arquivo",majuscule:"Maiúscula",chiffre:"Dígito",tiret:"Hífen",normal:"Normal",lignes:"linhas",taille:"tamanho",empty:"Prévia: clique em “Gerar”.",gen:"Gerar",dl:"Baixar",cp:"Copiar",psn:"Disponibilidade PSN ↗",ok:"Arquivo gerado com sucesso!",none:"Escolha pelo menos um tipo de linha.",dlfail:"Download cancelado.",cpok:"Copiado para a área de transferência.",cpfail:"Não é possível copiar aqui.",ko:"KB",mo:"MB",aria:"Idioma",mail:"Criar e-mail ↗",psnc:"Criar conta PSN ↗",th:"Temas",close:"Fechar",g_violet:"Roxo",g_green:"Verde",g_red:"Vermelho",g_blue:"Azul",g_pink:"Rosa",g_white:"Branco",g_black:"Preto",g_teal:"Turquesa",g_orange:"Laranja",g_yellow:"Amarelo",g_mix:"Mix",g_grad:"Gradiente",first:"Primeiras letras (opcional)",last:"Últimas letras / dígitos (opcional)",firstph:"",or:"ou",nodup:"Sem duplicados",fmt:"Formato",fav:"Favoritos",cpall:"Copiar tudo",clr:"Limpar",srch:"Buscar tema",rnd:"Aleatório",uniq:"Apenas {n} linhas únicas possíveis.",cpl:"Copiado.",favempty:"Clique em ☆ para guardar um nome.",expf:"Exportar",impf:"Importar",nostore:"O salvamento automático não está disponível neste navegador: use Exportar / Importar para manter seus favoritos."},
  ar:{loc:"ar",titre:"مولّد ",sub:"أنشئ 5L أو 6L لحسابات PSN الخاصة بك! انسخها من المتصفح أو نزّلها بصيغة .txt.",nb:"عدد الأسطر",len:"طول الاسم",nom:"اسم الملف",majuscule:"حرف كبير",chiffre:"رقم",tiret:"شرطة",normal:"عادي",lignes:"أسطر",taille:"الحجم",empty:"المعاينة: انقر على «إنشاء».",gen:"إنشاء",dl:"تنزيل",cp:"نسخ",psn:"توفّر PSN ↗",ok:"تم إنشاء الملف بنجاح!",none:"اختر نوع سطر واحدًا على الأقل.",dlfail:"تم إلغاء التنزيل.",cpok:"تم النسخ إلى الحافظة.",cpfail:"النسخ غير ممكن هنا.",ko:"ك.ب",mo:"م.ب",aria:"اللغة",mail:"إنشاء بريد إلكتروني ↗",psnc:"إنشاء حساب PSN ↗",th:"السمات",close:"إغلاق",g_violet:"بنفسجي",g_green:"أخضر",g_red:"أحمر",g_blue:"أزرق",g_pink:"وردي",g_white:"أبيض",g_black:"أسود",g_teal:"فيروزي",g_orange:"برتقالي",g_yellow:"أصفر",g_mix:"مزيج",g_grad:"تدرّج",first:"الأحرف الأولى (اختياري)",last:"الأحرف / الأرقام الأخيرة (اختياري)",firstph:"",or:"أو",nodup:"بدون تكرار",fmt:"الصيغة",fav:"المفضّلة",cpall:"نسخ الكل",clr:"مسح",srch:"ابحث عن سمة",rnd:"عشوائي",uniq:"يمكن إنشاء {n} أسطر فريدة فقط.",cpl:"تم النسخ.",favempty:"انقر على ☆ لحفظ اسم.",expf:"تصدير",impf:"استيراد",nostore:"الحفظ التلقائي غير متاح في هذا المتصفح: استخدم التصدير / الاستيراد للاحتفاظ بمفضّلتك."}
 };
+const AK=["tabGen","tabAcc","accP","accE","accW","accAdd","accEmpty","accWarn","accDel","accSure","accNone","accSaved","show","accExp","accImp"];
+const AC={
+ fr:["Générateur","Comptes","Pseudo PSN","E-mail","Mot de passe","Enregistrer le compte","Aucun compte enregistré pour l’instant.","Enregistré uniquement dans ce navigateur, sans chiffrement. N’y mets pas tes mots de passe importants : utilise un gestionnaire de mots de passe.","Supprimer","Sûr ?","Remplis au moins un champ.","Compte enregistré.","Afficher / masquer","Exporter","Importer"],
+ en:["Generator","Accounts","PSN username","Email","Password","Save account","No accounts saved yet.","Saved only in this browser, unencrypted. Don’t store your important passwords here: use a password manager.","Delete","Sure?","Fill in at least one field.","Account saved.","Show / hide","Export","Import"],
+ es:["Generador","Cuentas","Usuario PSN","Correo","Contraseña","Guardar cuenta","Aún no hay cuentas guardadas.","Se guarda solo en este navegador, sin cifrar. No guardes aquí tus contraseñas importantes: usa un gestor de contraseñas.","Eliminar","¿Seguro?","Rellena al menos un campo.","Cuenta guardada.","Mostrar / ocultar","Exportar","Importar"],
+ de:["Generator","Konten","PSN-Name","E-Mail","Passwort","Konto speichern","Noch keine Konten gespeichert.","Nur in diesem Browser gespeichert, unverschlüsselt. Speichere hier keine wichtigen Passwörter: Nutze einen Passwortmanager.","Löschen","Sicher?","Fülle mindestens ein Feld aus.","Konto gespeichert.","Anzeigen / verbergen","Exportieren","Importieren"],
+ it:["Generatore","Account","Nome PSN","E-mail","Password","Salva account","Nessun account salvato.","Salvato solo in questo browser, senza cifratura. Non salvare qui le password importanti: usa un gestore di password.","Elimina","Sicuro?","Compila almeno un campo.","Account salvato.","Mostra / nascondi","Esporta","Importa"],
+ ja:["ジェネレーター","アカウント","PSN名","メール","パスワード","アカウントを保存","保存されたアカウントはまだありません。","このブラウザにのみ、暗号化なしで保存されます。重要なパスワードは保存せず、パスワードマネージャーを使ってください。","削除","本当に？","少なくとも 1 つの項目を入力してください。","アカウントを保存しました。","表示／非表示","エクスポート","インポート"],
+ ko:["생성기","계정","PSN 아이디","이메일","비밀번호","계정 저장","저장된 계정이 아직 없습니다.","이 브라우저에만 암호화 없이 저장됩니다. 중요한 비밀번호는 여기에 저장하지 말고 비밀번호 관리자를 사용하세요.","삭제","확실한가요?","하나 이상의 항목을 입력하세요.","계정이 저장되었습니다.","표시 / 숭기기","내보내기","가져오기"],
+ ru:["Генератор","Аккаунты","Имя PSN","Почта","Пароль","Сохранить аккаунт","Сохранённых аккаунтов пока нет.","Сохраняется только в этом браузере, без шифрования. Не храни здесь важные пароли: используй менеджер паролей.","Удалить","Точно?","Заполни хотя бы одно поле.","Аккаунт сохранён.","Показать / скрыть","Экспорт","Импорт"],
+ pl:["Generator","Konta","Nazwa PSN","E-mail","Hasło","Zapisz konto","Brak zapisanych kont.","Zapisane tylko w tej przeglądarce, bez szyfrowania. Nie zapisuj tu ważnych haseł: użyj menedżera haseł.","Usuń","Na pewno?","Wypełnij co najmniej jedno pole.","Konto zapisane.","Pokaż / ukryj","Eksportuj","Importuj"],
+ uk:["Генератор","Акаунти","Ім’я PSN","Пошта","Пароль","Зберегти акаунт","Збережених акаунтів ще немає.","Зберігається лише в цьому браузері, без шифрування. Не зберігай тут важливі паролі: використовуй менеджер паролів.","Видалити","Точно?","Заповни принаймні одне поле.","Акаунт збережено.","Показати / сховати","Експорт","Імпорт"],
+ pt:["Gerador","Contas","Usuário PSN","E-mail","Senha","Salvar conta","Nenhuma conta salva ainda.","Salvo apenas neste navegador, sem criptografia. Não guarde aqui suas senhas importantes: use um gerenciador de senhas.","Excluir","Tem certeza?","Preencha pelo menos um campo.","Conta salva.","Mostrar / ocultar","Exportar","Importar"],
+ ar:["المولّد","الحسابات","اسم PSN","البريد الإلكتروني","كلمة المرور","حفظ الحساب","لا توجد حسابات محفوظة بعد.","يُحفظ في هذا المتصفح فقط وبدون تشفير. لا تحفظ هنا كلمات المرور المهمة: استخدم مدير كلمات المرور.","حذف","متأكد؟","املأ حقلًا واحدًا على الأقل.","تم حفظ الحساب.","إظهار / إخفاء","تصدير","استيراد"]
+};
+for(const l in AC)Object.assign(I18N[l],Object.fromEntries(AK.map((k,i)=>[k,AC[l][i]])));
 const t=k=>I18N[lang][k]??I18N.en[k];
 function showSize(){
   $("sLignes").textContent=nbLignes.toLocaleString(t("loc"));
@@ -193,6 +238,10 @@ function applyLang(){
   const sp=document.querySelectorAll(".stat span");sp[0].textContent=t("lignes");sp[1].textContent=t("taille");
   $("gen").textContent=t("gen");$("dl").textContent=t("dl");$("cp").textContent=t("cp");
   $("nodupT").textContent=t("nodup");document.querySelector('label[for=fmt]').textContent=t("fmt");$("favCp").textContent=t("cpall");$("favClr").textContent=t("clr");$("tq").placeholder=t("srch");$("tq").setAttribute("aria-label",t("srch"));$("rnd").textContent="🎲 "+t("rnd");$("favExp").textContent=t("expf");$("favImp").textContent=t("impf");renderFavs();
+  $("tbGen").textContent=t("tabGen");$("tbAcc").textContent=t("tabAcc");
+  [["ap","accP"],["ae","accE"],["aw","accW"]].forEach(([i,k])=>{document.querySelector("label[for="+i+"]").textContent=t(k)});
+  $("accAdd").textContent=t("accAdd");$("accExp").textContent=t("accExp");$("accImp").textContent=t("accImp");$("accWarn").textContent=t("accWarn");$("awEye").setAttribute("aria-label",t("show"));
+  renderAcc();
   if(!contenu){const e=document.querySelector("#apercu .empty");if(e)e.textContent=t("empty")}
   showSize();
 }
@@ -270,6 +319,37 @@ async function saveFile(nom,dat,mime){
 $("favExp").onclick=()=>{if(favs.length)saveFile("favoris.txt",favs.join("\n")+"\n","text/plain")};
 $("favImp").onclick=()=>$("favFile").click();
 $("favFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const tx=await f.text();tx.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^[A-Za-z0-9-]{1,64}$/.test(x)&&!favs.includes(x)).forEach(x=>favs.push(x));saveFavs()}catch(err){}e.target.value=""};
+let accs=[];
+try{const a=JSON.parse(localStorage.getItem("acc5l")||"[]");if(Array.isArray(a))accs=a.filter(x=>x&&typeof x==="object").map(x=>({p:String(x.p||"").slice(0,200),e:String(x.e||"").slice(0,200),w:String(x.w||"").slice(0,200)}))}catch(e){}
+const saveAcc=()=>{try{localStorage.setItem("acc5l",JSON.stringify(accs))}catch(e){}};
+function mk(tag,txt,cls){const n=document.createElement(tag);if(txt!=null)n.textContent=txt;if(cls)n.className=cls;return n}
+function cpText(v){navigator.clipboard.writeText(v).then(()=>toast(t("cpl")),()=>toast(t("cpfail")))}
+function renderAcc(){
+  const box=$("accList");box.textContent="";
+  if(!accs.length){box.append(mk("span",t("accEmpty"),"empty"));return}
+  accs.forEach((a,i)=>{
+    const card=mk("div",null,"acc");
+    [["accP",a.p,false],["accE",a.e,false],["accW",a.w,true]].forEach(([k,v,secret])=>{
+      const row=mk("div",null,"f"),val=mk("span",secret&&v?"••••••••":(v||"—"));
+      row.append(mk("small",t(k)),val);
+      if(secret&&v){const eye=mk("button","👁","mini");eye.type="button";eye.setAttribute("aria-label",t("show"));eye.onclick=()=>{val.textContent=val.textContent===v?"••••••••":v};row.append(eye)}
+      if(v){const c=mk("button","📋","mini");c.type="button";c.setAttribute("aria-label",t("cp"));c.onclick=()=>cpText(v);row.append(c)}
+      card.append(row)});
+    const del=mk("button",t("accDel"),"mini del");del.type="button";
+    del.onclick=()=>{if(del.dataset.s){accs.splice(i,1);saveAcc();renderAcc()}else{del.dataset.s="1";del.textContent=t("accSure")}};
+    card.append(del);box.append(card)});
+}
+$("accAdd").onclick=()=>{
+  const p=$("ap").value.trim(),e=$("ae").value.trim(),w=$("aw").value;
+  if(!p&&!e&&!w){toast(t("accNone"));return}
+  accs.unshift({p,e,w});saveAcc();renderAcc();["ap","ae","aw"].forEach(k=>$(k).value="");toast(t("accSaved"));
+};
+$("awEye").onclick=()=>{$("aw").type=$("aw").type==="password"?"text":"password"};
+$("accExp").onclick=()=>{if(accs.length)saveFile("comptes.json",JSON.stringify(accs,null,2),"application/json")};
+$("accImp").onclick=()=>$("accFile").click();
+$("accFile").onchange=async ev=>{const f=ev.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());if(Array.isArray(a))a.filter(x=>x&&typeof x==="object").map(x=>({p:String(x.p||"").slice(0,200),e:String(x.e||"").slice(0,200),w:String(x.w||"").slice(0,200)})).forEach(x=>{if(!accs.some(y=>y.p===x.p&&y.e===x.e&&y.w===x.w))accs.push(x)});saveAcc();renderAcc()}catch(err){}ev.target.value=""};
+function showTab(k){const g=k==="gen";$("tabGen").hidden=!g;$("tabAcc").hidden=g;$("tbGen").classList.toggle("on",g);$("tbAcc").classList.toggle("on",!g);$("tbGen").setAttribute("aria-selected",String(g));$("tbAcc").setAttribute("aria-selected",String(!g))}
+$("tbGen").onclick=()=>showTab("gen");$("tbAcc").onclick=()=>showTab("acc");
 function sfx(){try{const a=new Audio(MEOW);a.volume=.8;const r=a.play();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
 $("dl").onclick=async()=>{
   sfx();
